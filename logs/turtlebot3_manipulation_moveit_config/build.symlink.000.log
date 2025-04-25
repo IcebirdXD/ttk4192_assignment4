@@ -1,0 +1,3 @@
+Symlinking /home/andreas/catkin_ws/devel/share/turtlebot3_manipulation_moveit_config/cmake/turtlebot3_manipulation_moveit_configConfig.cmake
+Symlinking /home/andreas/catkin_ws/devel/share/turtlebot3_manipulation_moveit_config/cmake/turtlebot3_manipulation_moveit_configConfig-version.cmake
+Symlinking /home/andreas/catkin_ws/devel/lib/pkgconfig/turtlebot3_manipulation_moveit_config.pc

@@ -1,0 +1,2 @@
+turtlebot3_manipulation/turtlebot3_manipulation
+/home/andreas/catkin_ws/devel/.private/turtlebot3_manipulation/cmake.lock /home/andreas/catkin_ws/devel/./cmake.lock

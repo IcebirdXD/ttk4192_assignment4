@@ -1,0 +1,4 @@
+Symlinking /home/andreas/catkin_ws/devel/share/turtlebot3_manipulation_bringup/cmake/turtlebot3_manipulation_bringupConfig.cmake
+Symlinking /home/andreas/catkin_ws/devel/share/turtlebot3_manipulation_bringup/cmake/turtlebot3_manipulation_bringupConfig-version.cmake
+Symlinking /home/andreas/catkin_ws/devel/lib/turtlebot3_manipulation_bringup/turtlebot3_manipulation_bringup
+Symlinking /home/andreas/catkin_ws/devel/lib/pkgconfig/turtlebot3_manipulation_bringup.pc
