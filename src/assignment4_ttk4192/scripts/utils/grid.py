@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
 
 from utils.cases import TestCase
-from utils.environment import Environment
+from utils.environment import Environment_robplan
 
 
 class Grid:
@@ -126,7 +126,7 @@ class Grid_robplan:
 def main():
 
     tc = TestCase()
-    env = Environment(tc.obs3)
+    env = Environment_robplan(tc.obs3)
     grid = Grid(env)
 
     fig, ax = plt.subplots(figsize=(6,6))

@@ -4,7 +4,7 @@ from matplotlib.patches import Rectangle
 import numpy as np
 
 from utils.grid import Grid
-from utils.environment import Environment
+from utils.environment import Environment_robplan
 from utils.cases import TestCase
 from utils.utils import distance
 
@@ -125,7 +125,7 @@ def main(grid_on=True):
 
     tc = TestCase()
 
-    env = Environment(tc.obs)
+    env = Environment_robplan(tc.obs)
 
     grid = Grid(env)
 

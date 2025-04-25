@@ -6,7 +6,7 @@ from matplotlib.patches import Rectangle
 import matplotlib.animation as animation
 
 from utils.car import SimpleCar
-from utils.environment import Environment
+from utils.environment import Environment_robplan
 from utils.cases import TestCase
 from utils.utils import transform, directional_theta, plot_a_car, distance
 
@@ -280,7 +280,7 @@ def main():
 
     tc = TestCase()
 
-    env = Environment(tc.obs)
+    env = Environment_robplan(tc.obs)
 
     car = SimpleCar(env, tc.start_pos2, tc.end_pos2)
 

@@ -3,7 +3,7 @@ import time
 from math import pi, tan, sqrt
 from itertools import product
 
-from utils.map import map_grid_robplan
+from mission_planner_ttk4192 import map_grid_robplan
 from utils.grid import Grid_robplan
 from utils.car import RoboCar
 from utils.environment import Environment_robplan

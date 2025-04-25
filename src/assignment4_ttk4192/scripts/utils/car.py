@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from matplotlib.collections import PatchCollection
 import matplotlib.animation as animation
 
-from utils.environment import Environment
+from utils.environment import Environment_robplan
 from utils.cases import TestCase
 from utils.utils import transform, same_point
 
@@ -203,7 +203,7 @@ def main():
 
     tc = TestCase()
 
-    env = Environment()
+    env = Environment_robplan()
 
     car = SimpleCar(env, tc.start_pos, tc.end_pos)
 
