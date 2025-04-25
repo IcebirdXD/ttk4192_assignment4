@@ -31,10 +31,19 @@ from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 import shutil
 import copy
-# Import here the packages used in your codes
 
 
+from GNC import PosControl
 
+robot_pose = [0, 0, 0]  # Initial robot pose
+
+def odom_callback(msg):
+    global robot_pose
+    q = msg.pose.pose.orientation
+    (_, _, yaw) = tf.transformations.euler_from_quaternion([q.x, q.y, q.z, q.w])
+    x = msg.pose.pose.position.x
+    y = msg.pose.pose.position.y
+    robot_pose = [x, y, yaw]
 
 #2) GNC module (path-followig and PID controller for the robot)
 """  Robot GNC module ----------------------------------------------------------------------
@@ -558,6 +567,21 @@ WAYPOINTS = [[0.2,0.2, 0],[1.7,1.6, 0], [3.4, 1, pi], [3.3, 2.65, 0], [5.0, 0.3,
 domain_file = "/home/lars/catkin_ws/src/temporal-planning-main/temporal-planning/domains/ttk4192/domain/PDDL_domain_1.pddl"
 problem_file = "/home/lars/catkin_ws/src/temporal-planning-main/temporal-planning/domains/ttk4192/problem/PDDL_problem_1.pddl"
 
+def plan_path(start_pos, goal_pos):
+    tc = map_grid_robplan()
+    env = Environment_robplan(tc.obs)
+    car = SimpleCar(env, start_pos, goal_pos)
+    grid = Grid_robplan(env)
+    planner = HybridAstar(car, grid, reverse=False)
+
+    path, _ = planner.search_path()
+    if not path:
+        print("No valid path found")
+        return []
+
+    path_coords = [node.pos for node in path]
+    return path_coords
+
 
 # 5) Program here the main commands of your mission planner code
 """ Main code ---------------------------------------------------------------------------
@@ -577,6 +601,10 @@ if __name__ == '__main__':
         print()
         print("Press Intro to start ...")
         input_t=input("")
+        rospy.init_node('mission_planner_node')
+        rospy.Subscriber("/odom", Odometry, odom_callback)
+        rospy.sleep(1)  # Wait a moment to get the first odom message
+
         # 5.0) Testing the GNC module (uncomment lines to test)
 
         # aea
@@ -587,7 +615,7 @@ if __name__ == '__main__':
 
         gp = GraphPlan(domain_file, problem_file)
         plan_general = gp.graphPlan()
-
+        #pos_control = PosControl()
         # 5.3) Start mission execution 
         # convert string into functions and executing
         print("")
@@ -609,7 +637,7 @@ if __name__ == '__main__':
 
         while i_ini < task_total:
 
-            plan_temp=plan_general[i_ini].split()
+            plan_temp=plan_general[i_ini]
             print(plan_temp)
             if plan_temp[0]=="check_pump_picture_ir":
                 print("Inspect -pump")
@@ -619,12 +647,18 @@ if __name__ == '__main__':
                 print("check-valve-EO")
 
                 time.sleep(1)
+            if plan_temp[0] == "move_robot":
+                print("Planning path to:", plan_temp[1])
+                goal = waypoint_coords[plan_temp[1]]
 
-            if plan_temp[0]=="move_robot":
-                goal = waypoint_coords[plan_general[1]]
-                self.odom_sub = rospy.Subscriber("odom", Odometry, self.odom_callback)
+                # Plan path with Hybrid A*'
+                start= robot_pose
+                goal = waypoint_coords[plan_temp[1]]
+                path = plan_path(start, goal)
 
-                time.sleep(0.5)
+                # Follow the planned path
+                PosControl(path)
+
 
             if plan_temp[0]=="move_charge_robot":
                 print("")
