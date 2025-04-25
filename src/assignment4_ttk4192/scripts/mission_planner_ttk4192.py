@@ -34,7 +34,7 @@ import copy
 
 
 from GNC import PosControl
-
+from utils.dubins_path import DubinsPath
 robot_pose = [0, 0, 0]  # Initial robot pose
 
 def odom_callback(msg):
@@ -594,18 +594,18 @@ def main_hybrid_a(heu,start_pos, end_pos,reverse, extra, grid_on):
 
 class map_grid_robplan:
 
-    def __init__(self):
+        self.start_pos2 = [0.3, 0.3, 0]
+        self.end_pos2 = [0.8, 0.5, 0]
 
-        self.start_pos2 = [0.5, 0.5, -pi/2]
-        self.end_pos2 = [0.9, 2.55, -pi/2]
+        # [x_position, y_position, x_width, y_width]
         self.obs = [
-            [0.25, 1.1, 0.5, 0.2],   # box_wall_left
-            [1.7, 0.8, 0.5, 0.2],    # box_wp1
-            [3.41, 0.8, 0.5, 0.2],   # box_wp2
-            [1.3, 1.85, 0.2, 0.4],   # random_1
-            [2.6, 1.85, 0.4, 0.4],   # random_2
-            [3.81, 1.95, 0.4, 0.2],  # box_wp6
-            [1.0, 0.1, 2.0, 0.2],    # box_corner
+            [3.3, 0, 2, 0.2],   # box_wall_right
+            [0, 1, 0.5, 0.2],   # box_wall_left
+            [1.45, 0.7, 0.5, 0.2],    # box_wp1
+            [3.16, 0.7, 0.5, 0.2],   # box_wp2
+            [1.2, 1.65, 0.2, 0.4],   # random_1
+            [2.3, 1.65, 0.4, 0.4],   # random_2
+            [3.61, 1.95, 0.4, 0.2],  # box_wp6
         ]
 
 
@@ -831,7 +831,7 @@ if __name__ == '__main__':
         i_ini=0
         waypoint_coords = {
         "waypoint0": [0.2, 0.2, 0],
-        "waypoint1": [1.7, 1.6, 0],
+        "waypoint1": [1.6, 0.5, 0],
         "waypoint2": [3.4, 1.0, pi],
         "waypoint3": [3.3, 2.65, 0],
         "waypoint4": [5.0, 0.3, 0],
