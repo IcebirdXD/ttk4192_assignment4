@@ -593,7 +593,7 @@ def main_hybrid_a(heu,start_pos, end_pos,reverse, extra, grid_on):
 # Create a map grid here for Hybrid A* 
 
 class map_grid_robplan:
-
+    def __init__(self):
         self.start_pos2 = [0.3, 0.3, 0]
         self.end_pos2 = [0.8, 0.5, 0]
 
@@ -772,19 +772,20 @@ domain_file = "/home/lars/catkin_ws/src/temporal-planning-main/temporal-planning
 problem_file = "/home/lars/catkin_ws/src/temporal-planning-main/temporal-planning/domains/ttk4192/problem/PDDL_problem_1.pddl"
 
 def plan_path(start_pos, goal_pos):
-    tc = map_grid_robplan()
-    env = Environment_robplan(tc.obs)
+    env = Environment_robplan(map_grid_robplan().obs)
     car = SimpleCar(env, start_pos, goal_pos)
     grid = Grid_robplan(env)
     planner = HybridAstar(car, grid, reverse=False)
 
     path, _ = planner.search_path()
+
     if not path:
-        print("No valid path found")
+        print("❌ No valid path found from", start_pos, "to", goal_pos)
         return []
 
-    path_coords = [node.pos for node in path]
-    return path_coords
+    print("✅ Path found with", len(path), "points")
+    return [p[0] for p in path]  # extract (x, y, theta)
+
 
 
 # 5) Program here the main commands of your mission planner code
