@@ -203,7 +203,7 @@ class DubinsPath:
         vertex2 = self.car.get_car_bounding(t2)
 
         vertex = [vertex2[0], vertex2[1], vertex1[3], vertex1[2]]
-        #print("Straight is safe:",self.car.env.rectangle_safe(vertex))
+        print("Straight is safe:",self.car.env.rectangle_safe(vertex))
         return self.car.env.rectangle_safe(vertex)
     
     def is_turning_route_safe(self, start_pos, end_pos, d, c, r):
@@ -215,16 +215,19 @@ class DubinsPath:
         #   4. outer ringsector
 
         if not self.car.is_pos_safe(end_pos):
+            print("End pos is not safe")
             return False
         
         rs_inner, rs_outer = self.construct_ringsectors(start_pos, end_pos, d, c, r)
         
         if not self.car.env.ringsector_safe(rs_inner):
+            print("Inner ringsector is not safe")
             return False
         
         if not self.car.env.ringsector_safe(rs_outer):
+            print("Outer ringsector is not safe")
             return False
-
+        print("Turning is safe")
         return True
     
     def construct_ringsectors(self, start_pos, end_pos, d, c, r):

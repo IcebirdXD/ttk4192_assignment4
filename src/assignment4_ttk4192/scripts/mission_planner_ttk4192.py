@@ -31,7 +31,7 @@ from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 import shutil
 import copy
-
+from utils.car import SimpleCar
 
 from GNC import PosControl
 from utils.dubins_path import DubinsPath
@@ -253,7 +253,7 @@ class HybridAstar:
         self.w1 = 0.95 # weight for astar heuristic
         self.w2 = 0.05 # weight for simple heuristic
         self.w3 = 0.30 # weight for extra cost of steering angle change
-        self.w4 = 0.30 # weight for extra cost of turning
+        self.w4 = 0.20 # weight for extra cost of turning
         self.w5 = 0.50 # weight for extra cost of reversing
 
         self.thetas = get_discretized_thetas(self.unit_theta)
@@ -776,7 +776,7 @@ def plan_path(start_pos, goal_pos):
     env = Environment_robplan(map_grid_robplan().obs)
     car = SimpleCar(env, start_pos, goal_pos)
     grid = Grid_robplan(env)
-    planner = HybridAstar(car, grid, reverse=False)
+    planner = HybridAstar(car, grid, reverse=True)
 
     path, _ = planner.search_path()
 
@@ -857,7 +857,6 @@ if __name__ == '__main__':
                 start= robot_pose
                 goal = waypoint_coords[plan_temp[1]]
                 print("Planning path from:", start, "to:", goal)
-                
                 path = plan_path(start, goal)
 
                 # Follow the planned path

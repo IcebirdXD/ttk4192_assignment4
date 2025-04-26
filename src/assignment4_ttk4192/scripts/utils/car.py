@@ -23,7 +23,7 @@ class State:
 class SimpleCar:
     """ Car model and functions. """
     # Here you define the vehicle size "l" and the maximun_drift angle max_phi
-    def __init__(self, env, start_pos=None, end_pos=None, l=0.4, max_phi=pi/2):
+    def __init__(self, env, start_pos=None, end_pos=None, l=0.4, max_phi=pi/3):
 
         self.env = env
         self.l = float(l)
@@ -135,7 +135,7 @@ class SimpleCar:
     def is_pos_safe(self, pos):
         """ Check pos safety. """
         vertex = self.get_car_bounding(pos)
-        print('pos:', pos, "is safe:",self.env.rectangle_safe(vertex))
+        #print('pos:', pos, "is safe:",self.env.rectangle_safe(vertex))
         return self.env.rectangle_safe(vertex)
     
     def is_route_safe(self, pos, route):
