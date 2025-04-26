@@ -181,7 +181,7 @@ class DubinsPath:
             safe = self.is_straight_route_safe(s.t1, s.t2)
             if not safe:
                 continue
-
+            
             safe = self.is_turning_route_safe(pos0, s.t1, s.d[0], s.c1, self.r)
             if not safe:
                 continue
@@ -203,7 +203,7 @@ class DubinsPath:
         vertex2 = self.car.get_car_bounding(t2)
 
         vertex = [vertex2[0], vertex2[1], vertex1[3], vertex1[2]]
-
+        #print("Straight is safe:",self.car.env.rectangle_safe(vertex))
         return self.car.env.rectangle_safe(vertex)
     
     def is_turning_route_safe(self, start_pos, end_pos, d, c, r):

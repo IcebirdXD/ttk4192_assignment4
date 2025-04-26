@@ -134,9 +134,8 @@ class SimpleCar:
     
     def is_pos_safe(self, pos):
         """ Check pos safety. """
-
         vertex = self.get_car_bounding(pos)
-
+        print('pos:', pos, "is safe:",self.env.rectangle_safe(vertex))
         return self.env.rectangle_safe(vertex)
     
     def is_route_safe(self, pos, route):
