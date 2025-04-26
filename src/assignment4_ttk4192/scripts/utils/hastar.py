@@ -204,7 +204,7 @@ def run_hybrid_astar(heu, start, goal, reverse=False, extra_cost=True, visualize
     max_steer = pi / 5
 
     tc = map_grid_robplan(sim)
-    env = Environment_robplan(tc.obs, lx=5.0, ly=2.9, safe_distance=0.03)
+    env = Environment_robplan(tc.obs, lx=5.21, ly=2.75, safe_distance=0.03)
     car = RoboCar(env, start, goal, car_length, max_steer, car_width)
     grid = Grid_robplan(env, cell_size=0.1)
 

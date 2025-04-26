@@ -267,6 +267,7 @@ class HybridAstar:
         theta = round_theta(theta % (2*pi), self.thetas)
         
         cell_id = self.grid.to_cell_id(pt)
+        print("created node at", cell_id)
         grid_pos = cell_id + [theta]
 
         node = Node(grid_pos, pos)
