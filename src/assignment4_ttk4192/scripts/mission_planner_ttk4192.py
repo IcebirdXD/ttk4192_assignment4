@@ -831,13 +831,13 @@ if __name__ == '__main__':
         task_total=len(plan_general)
         i_ini=0
         waypoint_coords = {
-        "waypoint0": [0.2, 0.2, 0],
+        "waypoint0": [0.3, 0.3, 0],
         "waypoint1": [1.6, 0.5, 0],
-        "waypoint2": [3.4, 1.0, pi],
-        "waypoint3": [3.3, 2.65, 0],
-        "waypoint4": [5.0, 0.3, 0],
+        "waypoint2": [3.4, 1.1, 0],
+        "waypoint3": [3.3, 2.65, -pi],
+        "waypoint4": [5.0, 0.4, 0],
         "waypoint5": [0.9, 2.55, 0],
-        "waypoint6": [3.8, 1.65, 0]
+        "waypoint6": [3.8, 1.55, 0]
         }
 
         while i_ini < task_total:
@@ -853,12 +853,10 @@ if __name__ == '__main__':
 
                 time.sleep(1)
             if plan_temp[0] == "move_robot":
-                print("Planning path to:", plan_temp[1])
-                goal = waypoint_coords[plan_temp[1]]
-
-                # Plan path with Hybrid A*'
                 start= robot_pose
                 goal = waypoint_coords[plan_temp[1]]
+                print("Planning path from:", start, "to:", goal)
+                
                 path = plan_path(start, goal)
 
                 # Follow the planned path
