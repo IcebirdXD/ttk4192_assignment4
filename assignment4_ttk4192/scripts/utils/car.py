@@ -79,10 +79,10 @@ class SimpleCar:
 
         x, y, theta = pos
 
-        self.c1 = transform(x, y, 1.3*self.l, 0.4*self.l, theta, 1)
-        self.c2 = transform(x, y, 1.3*self.l, 0.4*self.l, theta, 2)
-        self.c3 = transform(x, y, 0.3*self.l, 0.4*self.l, theta, 3)
-        self.c4 = transform(x, y, 0.3*self.l, 0.4*self.l, theta, 4)
+        self.c1 = transform(x, y, 1.3*self.l, 0.8*self.l, theta, 1)
+        self.c2 = transform(x, y, 1.3*self.l, 0.8*self.l, theta, 2)
+        self.c3 = transform(x, y, 0.3*self.l, 0.8*self.l, theta, 3)
+        self.c4 = transform(x, y, 0.3*self.l, 0.8*self.l, theta, 4)
 
         vertex = [self.c1.tolist(), self.c2.tolist(), self.c4.tolist(), self.c3.tolist()]
 

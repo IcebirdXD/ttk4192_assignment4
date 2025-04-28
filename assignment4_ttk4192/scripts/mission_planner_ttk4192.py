@@ -34,6 +34,7 @@ import copy
 from utils.car import SimpleCar
 
 from GNC import PosControl
+from GNC import turtle_turn
 from utils.dubins_path import DubinsPath
 robot_pose = [0.2, 0.2, 0]  # Initial robot pose
 
@@ -380,7 +381,7 @@ class HybridAstar:
         
         return list(reversed(route))
     
-    def search_path(self, heu=1, extra=False):
+    def search_path(self, heu=0, extra=False):
         """ Hybrid A* pathfinding. """
 
         root = self.construct_node(self.start)
@@ -463,6 +464,7 @@ def main_hybrid_a(heu,start_pos, end_pos,reverse, extra, grid_on):
         return
     # a post-processing is required to have path list
     path = path[::5] + [path[-1]]
+    print(path.pos)
     #for i in range(len(path)):
     #    print(path[i].pos[0])
     
@@ -587,28 +589,26 @@ def main_hybrid_a(heu,start_pos, end_pos,reverse, extra, grid_on):
         return _branches, _path, _carl, _path1, _car
 
     ani = animation.FuncAnimation(fig, animate, init_func=init, frames=frames,
-                                  interval=1, repeat=True, blit=True)
+                                  interval=1, repeat=False, blit=True)
 
     plt.show()
 
 # Create a map grid here for Hybrid A* 
 
 class map_grid_robplan:
+    """Here the obstacles are defined for a 20x20 map."""
     def __init__(self):
-        self.start_pos2 = [0.3, 0.3, 0]
-        self.end_pos2 = [0.8, 0.5, 0]
 
         # [x_position, y_position, x_width, y_width]
         self.obs = [
-            [3.3, 0, 2, 0.2],   # box_wall_right
-            [0, 1, 0.5, 0.2],   # box_wall_left
-            [1.45, 0.7, 0.5, 0.2],    # box_wp1
-            [3.16, 0.7, 0.5, 0.2],   # box_wp2
-            [1.2, 1.65, 0.2, 0.4],   # random_1
-            [2.3, 1.65, 0.4, 0.4],   # random_2
-            [3.61, 1.95, 0.4, 0.2],  # box_wp6
+            [3.3, 0, 1.91, 0.2],   # box_wall_right
+            [0, 1.0, 0.5, 0.2],
+            [1.2, 1.65, 0.2, 0.4],
+            [2.3, 1.65, 0.4, 0.4],
+            [1.45, 0.7, 0.5, 0.2],
+            [3.16, 0.7, 0.5, 0.2],
+            [3.61, 1.75, 0.4, 0.2],
         ]
-
 
 #4) Program here the turtlebot actions (based in your AI planner)
 
@@ -684,9 +684,11 @@ def move_robot_waypoint0_waypoint1():
     turtlebot_move()
 
 
-def Manipulate_OpenManipulator_x():
+def Manipulate_OpenManipulator_x(thetaAct, thetaOrg):
+    turtle_turn(thetaAct)
     print("Executing manipulate a weight")
-    time.sleep(5)
+    time.sleep(2)
+    turtle_turn(thetaOrg)
 
 def making_turn_exe():
     print("Executing Make a turn")
@@ -759,8 +761,9 @@ def charge_battery_waypoint0():
 
 
 # Define the global varible: WAYPOINTS  Wpts=[[x_i, y_i, theta]];
-global WAYPOINTS
-WAYPOINTS = [[0.2,0.2, 0],[1.7,1.6, 0], [3.4, 1, pi], [3.3, 2.65, 0], [5.0, 0.3, 0], [0.9, 2.55, 0], [3.8, 1.65, 0]]
+
+ANGLE = [0, pi/2, -pi/2, pi/2, -pi/2] # Angles for performing task
+WP = [[0.2, 0.2, 0],[1.7,0.4, 0], [3.4, 1.3, 0], [3.3, 2.40, 0], [4.9, 0.6, -pi/2], [0.9, 2.55, 0], [3.8, 1.65, 0]]
 
 #domain_file = "/home/lars/catkin_ws/src/temporal-planning-main/temporal-planning/domains/ttk4192/domain/PDDL_domain_1.pddl"
 #problem_file = "/home/lars/catkin_ws/src/temporal-planning-main/temporal-planning/domains/ttk4192/problem/PDDL_problem_1.pddl"
@@ -787,6 +790,22 @@ def plan_path(start_pos, goal_pos):
 # 5) Program here the main commands of your mission planner code
 """ Main code ---------------------------------------------------------------------------
 """
+
+def moveToWp(start_pos, end_pos):
+    print("Planning path from ", start_pos, " to ", end_pos)
+    path = plan_path(start_pos, end_pos)
+    print("Driving")
+    ctr = PosControl(path, start_pos)
+    actual_end_pos = [ctr.x, ctr.y, ctr.theta]
+    return actual_end_pos
+
+def takePicture(thetaPic, thetaOrg):
+    turtle_turn(thetaPic)
+    print("Taking phot")
+    taking_photo_exe()
+    turn = turtle_turn(thetaOrg)
+    return turn.theta
+
 if __name__ == '__main__':
     try:
         # print()
@@ -803,10 +822,10 @@ if __name__ == '__main__':
         # print("Press Intro to start ...")
         #input_t=input("")
         #rospy.init_node('mission_planner_node')
-        rospy.init_node('turtlebot_move', anonymous=False)
-        #rospy.Subscriber("/odom", Odometry, odom_callback)
-        #rospy.sleep(1)  # Wait a moment to get the first odom message
-
+        rospy.init_node('turtlebot_move', anonymous=False) #THIS ONE
+        rospy.Subscriber("/odom", Odometry, odom_callback)
+        rospy.sleep(1)  # Wait a moment to get the first odom message
+        print("Robotpos:", robot_pose)
         # # 5.0) Testing the GNC module (uncomment lines to test)
 
         # # aea
@@ -873,43 +892,72 @@ if __name__ == '__main__':
 
 
         #     i_ini=i_ini+1  # Next tasks
-        wp0 = [0.2, 0.2, 0]
-        wp1 = [1.8, 0.3, pi/2]
-        wp2 = [3.4, 1.3, -pi/2]
-        wp3 = [3.3, 2.40, pi/2]
-        wp4 = [4.8, 0.6, -pi/2]
-        p = argparse.ArgumentParser()
-        p.add_argument('-heu', type=int, default=1, help='heuristic type')  #A* heuristic
-        p.add_argument('-r', action='store_true', help='allow reverse or not')
-        p.add_argument('-e', action='store_true', help='add extra cost or not')
-        p.add_argument('-g', action='store_true', help='show grid or not')
-        args = p.parse_args()
-        main_hybrid_a(args.heu,wp3,wp4,True,False,args.g)
+       
+        # p = argparse.ArgumentParser()
+        # p.add_argument('-heu', type=int, default=1, help='heuristic type')  #A* heuristic
+        # p.add_argument('-r', action='store_true', help='allow reverse or not')
+        # p.add_argument('-e', action='store_true', help='add extra cost or not')
+        # p.add_argument('-g', action='store_true', help='show grid or not')
+        # args = p.parse_args()
+        # #main_hybrid_a(args.heu,wp0,wp1,True,False,args.g)
+        # plotPath = plan_path(WP[3], WP[4])
+        # x_values = [point[0] for point in plotPath]
+        # y_values = [point[1] for point in plotPath]
 
-        print("Finding path wp0 wp1")
-        path = plan_path(wp0, wp1)
-        # Take a photo
+        # # Plotting the path
+        # plt.figure(figsize=(8, 6))
+        # plt.plot(x_values, y_values, marker='o', color='g', label='Path')
+        # plt.title('Path Plot')
+        # plt.xlabel('X')
+        # plt.ylabel('Y')
+        # plt.grid(True)
+        # plt.legend()
+        # plt.show()
+
+        print("Moving from wp0 to wp1")
+        moveToWp(robot_pose, WP[1]) # Turtle is initilized at WP0
+        print("Taking picture of wp1")
+        takePicture(ANGLE[1], WP[1][2])
         
-        print("Finding path wp1 wp2")
-        path2 = plan_path(wp1, wp2)
+        print("Moving from wp1 to wp2")
+        moveToWp(robot_pose, WP[2])
+        print("Taking picture of wp2")
+        takePicture(ANGLE[2], WP[2][2])
+
+        print("Moving from wp2 to wp3")
+        moveToWp(robot_pose, WP[3])
+        Manipulate_OpenManipulator_x(ANGLE[3], WP[3][2])
         
-        print("Finding path wp2 wp3")
-        path3 = plan_path(wp2, wp3)
+        print("Move from wp3 to wp4")
+        moveToWp(robot_pose, WP[4])
+        print("PARK BBY")
 
-        print("Finding path wp3 wp4")
-        path4 = plan_path(wp3, wp4)
+        # print("Finding path wp0 wp1")
+        # path1 = plan_path(wp0, wp1)
+        # print("Driving wp0 to wp1")
+        # ctr1 = PosControl(path1, wp0)
+        # turtle_turn(pi/2)
+        # print("Taking photo of wp1")
+        # taking_photo_exe()
+        # turtle_turn(0)
+        # print("x at end:", ctr1.x, "theta:", ctr1.theta)
+        # pos1 = [ctr1.x, ctr1.y, ctr1.theta]
 
-        print("Driving wp0 to wp1")
-        controller = PosControl(path, wp0)
-        print("x at end:", controller.x)
-        print("Taking photo of wp1")
-        taking_photo_exe()
-        print("Driving wp1 to wp2")
-        PosControl(path2, wp1)
-        print("Driving wp2 to wp3")
-        PosControl(path3, wp2)
-        print("Driving wp3 to wp4")
-        PosControl(path4, wp3)
+        # print("Finding path wp1 wp2")
+        # path2 = plan_path(pos1, wp2)
+        # print("Driving wp1 to wp2")
+        # ctr2 = PosControl(path2, pos1)
+        # turtle_turn(-pi/2)
+        
+        # print("Finding path wp2 wp3")
+        # path3 = plan_path(wp2, wp3)
+
+        # print("Finding path wp3 wp4")
+        # path4 = plan_path(wp3, wp4)
+        # print("Driving wp2 to wp3")
+        # PosControl(path3, wp2)
+        # print("Driving wp3 to wp4")
+        # PosControl(path4, wp3)
         #move_robot_waypoint0_waypoint1()
 
         print("")

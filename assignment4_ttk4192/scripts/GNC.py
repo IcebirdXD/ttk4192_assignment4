@@ -35,24 +35,30 @@ class PosControl():
         self.trajectory = list()                                               # store history (trajectory driven by turtlebot3)
         rospy.sleep(1)
 
-        self.kp = 0.1
+        self.kp = 0.05
         self.CONSTANT_ANGULAR_SPEED = 5
         self.CONSTANT_LINEAR_SPEED = 10
         self.CONSTANT_REVERSE_SPEED = 2.5
 
-        self.MAX_LINEAR_SPEED = 0.2
+        self.MAX_LINEAR_SPEED = 0.1
         self.MIN_LINEAR_SPEED = 0.01
         self.MAX_ORIENTATION_SPEED = 0.2
-        self.DISTANCE_THRESHOLD = 0.07
-        self.ORIENTATION_THRESHOLD_LOW = 0.05
-        self.ORIENTATION_THRESHOLD_HIGH = 0.2
+        self.DISTANCE_THRESHOLD = 0.08
+        self.ORIENTATION_THRESHOLD_LOW = 0.08
+        self.ORIENTATION_THRESHOLD_HIGH = 0.25
         self.orientation_threshold = self.ORIENTATION_THRESHOLD_LOW
+
+        # PID controllers
+        #self.pid_angular = PID(P=2.0, I=0.0, D=0.2)  # Example gains, will tune later
+        self.pid_linear = PID(P=1.0, I=1.0, D=10.0)  # Example gains, will tune later
+
 
         # track a sequence of waypoints
         # for point in WAYPOINTS: 
         st = time.perf_counter()                                               # global list of wpns (xi,yi)
         for point in self.path:
             self.move_to_point(point)
+        print("End of path:", path[-1])
 
         et = time.perf_counter()
         self.stop()
@@ -79,6 +85,7 @@ class PosControl():
         self.destination = False
         self.dir = 8.0
         while (not self.destination):
+            
             errorX = target_pos[0] - self.x
             errorY = target_pos[1] - self.y
             target_distance = sqrt(errorX**2 + errorY**2)
@@ -90,32 +97,38 @@ class PosControl():
 
             if robot_direction @ target_direction < -0.1:
                 target_theta = target_theta + np.pi
+                target_theta = ssa(target_theta + np.pi)
                 target_direction = np.array([cos(target_theta), sin(target_theta)])
                 errorTheta = ssa(target_theta - self.theta) 
                 self.dir = -8.0
             elif self.dir < 0:
                 self.dir = 8.0
 
+            self.pid_linear.setPoint(0.0)  # want no distance error
+            linear_cmd = self.pid_linear.update(-target_distance)  # negative because we want to reduce distance
+
             # angle error is to big (only adjust orientation until within threshold)
             if abs(errorTheta) > self.orientation_threshold and (target_distance > self.DISTANCE_THRESHOLD):  # angle error is to big
                 self.orientation_threshold = self.ORIENTATION_THRESHOLD_LOW
-                self.vel.angular.z = 2*self.kp*errorTheta*self.CONSTANT_ANGULAR_SPEED
+                self.vel.angular.z = self.kp*errorTheta*self.CONSTANT_ANGULAR_SPEED
                 
             # # move towards target position adjusting speed and orientation
             else:
                 self.orientation_threshold = self.ORIENTATION_THRESHOLD_HIGH
 
                 # adjust orientation
-                self.vel.angular.z = 2*self.kp*errorTheta*self.CONSTANT_ANGULAR_SPEED
+                self.vel.angular.z = self.kp*errorTheta*self.CONSTANT_ANGULAR_SPEED
 
                 # adjust speed
                 if target_distance > self.DISTANCE_THRESHOLD:
-                    self.vel.linear.x = max(min(self.CONSTANT_LINEAR_SPEED*self.kp*target_distance, self.MAX_LINEAR_SPEED), self.MIN_LINEAR_SPEED)
+                    #self.vel.linear.x = max(min(self.CONSTANT_LINEAR_SPEED*self.kp*target_distance, self.MAX_LINEAR_SPEED), self.MIN_LINEAR_SPEED)
+                    self.vel.linear.x = np.clip(linear_cmd, -self.MAX_LINEAR_SPEED, self.MAX_LINEAR_SPEED) * self.dir
                     self.vel.linear.x *= self.dir
                 else:
                     self.vel.linear.x = 0.0
                     self.vel.angular.z = 0.0
                     self.destination = True
+
 
 
             if self.vel.angular.z > self.MAX_ORIENTATION_SPEED:                                   # limit orientation speed
@@ -126,6 +139,8 @@ class PosControl():
 
             self.vel_pub.publish(self.vel)
             self.rate.sleep()
+            
+
         # Check that you have right pose
 
     def stop(self):
